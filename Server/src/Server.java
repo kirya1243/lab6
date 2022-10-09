@@ -25,23 +25,21 @@ public class Server {
                 ByteBuffer byteBuffer = ByteBuffer.wrap(arr);
                 SocketAddress addr = dc.receive(byteBuffer);
                 ByteInputStream bis = new ByteInputStream(arr, arr.length);
-                Organization response;
+                String response;
                 try {
                     ObjectInputStream ois = new ObjectInputStream(bis);
-                    response = (Organization) ois.readObject();
+                    response = (String) ois.readObject();
                     byteBuffer.clear();
                 } catch (StreamCorruptedException e) {
                     continue;
                 }
                 System.out.println(response);
-                response.setName("Hui");
                 ByteOutputStream bos = new ByteOutputStream();
                 ObjectOutputStream oos = new ObjectOutputStream(bos);
                 oos.writeObject(response);
                 oos.flush();
 
                 byte[] arr1 = bos.getBytes();
-//            System.out.println(bytes.length, byteBuffer.position() +"byteBuffer.limit() + " " + byteBuffer.capacity());
                 dc.send(ByteBuffer.wrap(arr1), addr);
             }
 

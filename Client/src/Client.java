@@ -1,3 +1,4 @@
+import InputManager.InputManager;
 import Organization.Organization;
 import com.sun.xml.internal.messaging.saaj.util.ByteInputStream;
 import com.sun.xml.internal.messaging.saaj.util.ByteOutputStream;
@@ -12,23 +13,35 @@ import java.net.SocketAddress;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.SocketChannel;
 import java.nio.charset.StandardCharsets;
+import java.util.NoSuchElementException;
+import java.util.Scanner;
 
 public class Client {
-    String vanya = "Vanya";
+    String str = "Gleb";
     Organization organization = new Organization();
     {
         organization.setCoordinates(new Coordinates());
+        organization.setName(str);
     }
-//    byte[] arr = {};
-    InetAddress host;
 
     public void main() {
+
         try {
-            host = InetAddress.getLocalHost();
+            InetAddress host = InetAddress.getLocalHost();
             DatagramChannel dc = DatagramChannel.open();
             int port = 1111;
             SocketAddress addr = new InetSocketAddress(host, port);
+            ClientInputManager cInputManager = new ClientInputManager();
+            cInputManager.run();
+
+
+
+
+
+
 
             byte[] arr;
             ByteOutputStream bos = new ByteOutputStream();
@@ -46,10 +59,6 @@ public class Client {
             ObjectInputStream ois = new ObjectInputStream(bis);
             Organization response = (Organization) ois.readObject();
             System.out.println(response);
-        } catch (UnknownHostException e ) {e.printStackTrace();} catch (IOException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
+        } catch (ClassNotFoundException | IOException e ) {e.printStackTrace();}
     }
 }

@@ -1,23 +1,24 @@
-package InputManager;
-
-
 import CommadManager.CommandManager;
+import com.sun.xml.internal.messaging.saaj.util.ByteOutputStream;
 
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.nio.ByteBuffer;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 
-public class InputManager {
+public class ClientInputManager {
     private boolean running = true;
     private final Scanner scanner;
     private final boolean isUser;
 
-    public InputManager(Scanner scanner) {
+    public ClientInputManager(Scanner scanner) {
 
         this.scanner = scanner;
         this.isUser = false;
     }
-    public InputManager() {
+    public ClientInputManager() {
         this.isUser = true;
         this.scanner = new Scanner(System.in);
     }
@@ -64,6 +65,7 @@ public class InputManager {
         String arg1 = lineParts.length == 2 ? lineParts[1] : "";
         String arg2 = lineParts.length == 3 ? lineParts[2] : "";
         String answer;
+        byte[] arr;
         switch (command) {
             case "help":
             case "show":
@@ -74,7 +76,23 @@ public class InputManager {
             case "print_field_descending_annual_turnover":
             case "save":{
                 if (!validateArgumentsNumber(lineParts.length, 0)) return;
-                answer = CommandManager.execute(command);
+                ByteOutputStream bos = new ByteOutputStream();
+                try {
+                    ObjectOutputStream oos = new ObjectOutputStream(bos);
+                    oos.writeObject(command);
+                    oos.flush();
+                    arr = bos.getBytes();
+                    ByteBuffer buf = ByteBuffer.wrap(arr);
+                    dc.send(buf, addr);
+                    buf.clear();
+                } catch (IOException e) {
+                    System.out.println("Sending error");;
+                }
+                answer = "Sanded";
+
+
+
+//                answer = CommandManager.execute(command);
 //                Client.write(command)
                 break;
             }
@@ -82,14 +100,14 @@ public class InputManager {
             case "add_if_min":
             case "remove_greater":{
                 if (!validateArgumentsNumber(lineParts.length, 0)) return;
-                InputOrganization org = new InputOrganization(scanner, isUser);
+                ClientInputOrganization org = new ClientInputOrganization(scanner, isUser);
                 answer = CommandManager.execute(command, org.run());
                 break;
             }
             case "update": {
                 if (!validateArgumentsNumber(lineParts.length, 1)) return;
                 try {
-                    InputOrganization org = new InputOrganization(scanner, isUser);
+                    ClientInputOrganization org = new ClientInputOrganization(scanner, isUser);
                     answer = CommandManager.execute(command, Integer.parseInt(lineParts[1]), org.run());
                 } catch (NumberFormatException e) {
                     answer = "Wrong id";
@@ -124,9 +142,9 @@ public class InputManager {
         return length == number + 1;
     }
 
-    private <T> boolean validateArgument(T argument, Validator<T> validator) {
-        return validator.validate(argument);
-    }
+//    private <T> boolean validateArgument(T argument, Validator<T> validator) {
+//        return validator.validate(argument);
+//    }
 
 
     public void stopRunning() {
@@ -135,3 +153,4 @@ public class InputManager {
 
 
 }
+
